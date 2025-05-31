@@ -1,2 +1,0 @@
-# monkeydegenclub
-monkey degen club
