@@ -17,20 +17,20 @@ async function main() {
     //     '-1001998961899', // Gem tools
     // ]
     // PROD
-    // const chatIdsToTrack = [
-    //     'gem_tools_calls',
-    //     'pfultimate'
-    // ]
+    const chatIdsToTrack = [
+        'gem_tools_calls',
+        'pfultimate'
+    ]
 
     // DEV
     // const chatIdsToTrack = [
     //     '-1002503039300', // Test 1
     //     '-1002570818680' // Test 2
     // ]
-    const chatIdsToTrack = [
-        'vyacheslav_sol_tests_1',
-        'vyacheslav_sol_tests_2'
-    ]
+    // const chatIdsToTrack = [
+    //     'vyacheslav_sol_tests_1',
+    //     'vyacheslav_sol_tests_2'
+    // ]
 
     const client = new TelegramClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
