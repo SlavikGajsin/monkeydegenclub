@@ -58,10 +58,10 @@ async function main() {
 
     const telegramScrapper = new TelegramScrapper(client);
 
-    // telegramScrapper.debug((_, event) => {
-    //     console.log(_, event)
-    //     signalHandler(_)
-    // })
+    telegramScrapper.debug((_, event) => {
+        console.log(_, event)
+        client.sendMessage(-1002366455023, { message: _ });
+    })
 
     const signalHandler = (tokenAddress: string) => {
         // entity: id of closed group chat
