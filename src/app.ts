@@ -18,8 +18,9 @@ async function main() {
     // ]
     // PROD
     const chatIdsToTrack = [
-        'gem_tools_calls',
-        'pfultimate'
+        //'gem_tools_calls',
+        'pfultimate',
+        'ai_agent_solana_0xbot'
     ]
 
     // DEV
@@ -58,10 +59,10 @@ async function main() {
 
     const telegramScrapper = new TelegramScrapper(client);
 
-    // telegramScrapper.debug((_, event) => {
-    //     console.log(_, event)
-    //     client.sendMessage(-1002366455023, { message: _ });
-    // })
+    telegramScrapper.debug((_, event) => {
+        console.log(_, event)
+        client.sendMessage('RTD_makes', { message: String(_) })
+    })
 
     const signalHandler = (tokenAddress: string) => {
         // entity: id of closed group chat
