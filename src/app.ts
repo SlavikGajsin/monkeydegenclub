@@ -18,9 +18,9 @@ async function main() {
     // ]
     // PROD
     const chatIdsToTrack = [
-        //'gem_tools_calls',
+        'gem_tools_calls',
         'pfultimate',
-        'ai_agent_solana_0xbot'
+        // 'ai_agent_solana_0xbot'
     ]
 
     // DEV
