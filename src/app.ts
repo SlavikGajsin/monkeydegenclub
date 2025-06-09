@@ -68,8 +68,8 @@ async function main() {
         // entity: id of closed group chat
         // replyTo: the topic id
         // @ts-ignore
-        client.sendMessage(-1002366455023, { message: String(tokenAddress), replyTo: 2 })
-        // client.sendMessage('RTD_makes', { message: String(tokenAddress) })
+        client.sendMessage(-1002510658856, { message: String(tokenAddress), replyTo: 2 }) // приватка где тестится бот
+        client.sendMessage('RTD_makes', { message: String(tokenAddress) })
     }
 
     const signalsComposer = new SignalsComposer({ chatIdsToTrack }, signalHandler);
