@@ -61,15 +61,15 @@ async function main() {
 
     telegramScrapper.debug((_, event) => {
         console.log(_, event)
-        client.sendMessage('RTD_makes', { message: String(_) })
+        client.sendMessage('RTD_makes', { message: String(_ || 'suka') })
     })
 
     const signalHandler = (tokenAddress: string) => {
         // entity: id of closed group chat
         // replyTo: the topic id
         // @ts-ignore
-        client.sendMessage(-1002510658856, { message: String(tokenAddress), replyTo: 2 }) // приватка где тестится бот
-        client.sendMessage('RTD_makes', { message: String(tokenAddress) })
+        client.sendMessage(-1002510658856, { message: String(tokenAddress || 'blya'), replyTo: 2 }) // приватка где тестится бот
+        client.sendMessage('RTD_makes', { message: String(tokenAddress || 'blyat') })
     }
 
     const signalsComposer = new SignalsComposer({ chatIdsToTrack }, signalHandler);
