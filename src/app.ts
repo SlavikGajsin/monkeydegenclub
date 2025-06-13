@@ -1,9 +1,10 @@
 import {TelegramClient, Api} from "telegram";
 import input from 'input'
 import {TelegramScrapper} from "./modules/tg-scrapper/tg-scrapper.js";
-import {StoreSession} from "telegram/sessions";
+import {StoreSession} from "telegram/sessions/index.js";
 import {SignalsComposer} from "./modules/signals-composer/signals-composer.js";
-import {SolanaUtils} from "./modules/utils/solana-contract-parser";
+import {SolanaUtils} from "./modules/utils/solana-contract-parser.js";
+import {SolanaTokenDataService} from "./modules/utils/solana-token-data-service.js";
 
 
 async function main() {
@@ -17,21 +18,21 @@ async function main() {
     //     '-1001998961899', // Gem tools
     // ]
     // PROD
-    const chatIdsToTrack = [
-        'gem_tools_calls',
-        'pfultimate',
-        // 'ai_agent_solana_0xbot'
-    ]
+    // const chatIdsToTrack = [
+    //     'gem_tools_calls',
+    //     'pfultimate',
+    //     // 'ai_agent_solana_0xbot'
+    // ]
 
     // DEV
     // const chatIdsToTrack = [
     //     '-1002503039300', // Test 1
     //     '-1002570818680' // Test 2
     // ]
-    // const chatIdsToTrack = [
-    //     'vyacheslav_sol_tests_1',
-    //     'vyacheslav_sol_tests_2'
-    // ]
+    const chatIdsToTrack = [
+        'vyacheslav_sol_tests_1',
+        'vyacheslav_sol_tests_2'
+    ]
 
     const client = new TelegramClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
@@ -64,12 +65,43 @@ async function main() {
         client.sendMessage('RTD_makes', { message: String(_ || 'suka') })
     })
 
-    const signalHandler = (tokenAddress: string) => {
+    const solanaTokenDataService = new SolanaTokenDataService();
+
+    const signalHandler = async (tokenAddress: string) => {
         // entity: id of closed group chat
         // replyTo: the topic id
         // @ts-ignore
-        client.sendMessage(-1002510658856, { message: String(tokenAddress || 'blya'), replyTo: 2 }) // приватка где тестится бот
-        client.sendMessage('RTD_makes', { message: String(tokenAddress || 'blyat') })
+
+        let message = '';
+
+        if (tokenAddress) {
+            message += `\`${tokenAddress}\``;
+
+            const tokenData = await solanaTokenDataService.getTokenData(tokenAddress);
+
+            if (tokenData) {
+                // message += `/n ${JSON.stringify(tokenData)}`;
+
+                if (tokenData.ticker) {
+                    message += `\n(${tokenData.ticker})`
+                }
+
+                if (tokenData.marketCap) {
+                    message += `\n$ ${Math.floor(Number(tokenData.marketCap) / 1000)}k MC`
+                }
+            }
+        }
+
+        if (!tokenAddress) {
+            message = 'LOL HACKER HAS A REST AND U SHOULD TOO'
+        }
+
+        await Promise.allSettled([
+            client.sendMessage(-1002510658856, { message, replyTo: 2 }), // приватка где тестится бот
+            client.sendMessage('RTD_makes', { message })
+        ])
+
+
     }
 
     const signalsComposer = new SignalsComposer({ chatIdsToTrack }, signalHandler);

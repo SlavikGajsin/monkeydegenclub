@@ -1,5 +1,5 @@
 import { TelegramClient } from "telegram";
-import {NewMessage} from "telegram/events";
+import {NewMessage} from "telegram/events/index.js";
 
 
 type SubscriptionHandler = (message: string) => any
@@ -10,9 +10,6 @@ export class TelegramScrapper {
 
     constructor(private readonly client: TelegramClient) {}
 
-    private get isClientHasEventHandlers(){
-        return !!this.client.listEventHandlers().length
-    }
 
     private extractMessage(message: any): string | null {
         return typeof message === 'string'
