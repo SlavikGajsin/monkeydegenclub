@@ -86,7 +86,7 @@ async function main() {
                     message += `\n(${tokenData.ticker})`
                 }
 
-                if (tokenData.marketCap) {
+                if (tokenData.marketCap && !Number.isNaN(Number(tokenData.marketCap))) {
                     message += `\n$ ${Math.floor(Number(tokenData.marketCap) / 1000)}k MC`
                 }
             }
