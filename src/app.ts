@@ -97,8 +97,9 @@ async function main() {
         }
 
         await Promise.allSettled([
-            client.sendMessage(-1002510658856, { message, replyTo: 2 }), // приватка где тестится бот
-            client.sendMessage('RTD_makes', { message })
+            // client.sendMessage(-1002510658856, { message, replyTo: 2 }), // приватка где тестится бот
+            client.sendMessage('RTD_makes', { message }),
+            client.sendMessage('-1002630922980', { message })
         ])
 
 
