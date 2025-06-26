@@ -1,16 +1,23 @@
+import { performance } from "perf_hooks";
+
 interface TokenSignalOptions {
     tokenAddress: string;
     chatId: string;
+    createdAt: number /** perfomance.now() */
 }
 
+
 class TokenSignal {
-    constructor(public readonly options: TokenSignalOptions) {}
+    constructor(
+        public readonly options: TokenSignalOptions,
+    ) {}
 }
 
 type TokenAddress = string
 
 interface SignalsComposerOptions {
     chatIdsToTrack: string[];
+    signalLifetime: number // ms
 }
 
 type SubscriptionHandler = (tokenAddress: string) => void;
@@ -31,6 +38,12 @@ export class SignalsComposer {
         })
     }
 
+    private isTokenSignalLate(tokenSignals: TokenSignal[]) {
+        const [first, last] = tokenSignals
+
+        return Math.abs(first.options.createdAt - last.options.createdAt) > this.options.signalLifetime;
+    }
+
     private untrackToken(tokenAddress: TokenAddress) {
         this.signals.delete(tokenAddress);
         this.firedSignalTokenAddresses.add(tokenAddress);
@@ -49,14 +62,28 @@ export class SignalsComposer {
         const existingSignals = this.signals.get(tokenAddress);
 
         if (!existingSignals) {
-            this.signals.set(tokenAddress, [new TokenSignal({ tokenAddress, chatId })])
+            this.signals.set(tokenAddress, [new TokenSignal({ tokenAddress, chatId, createdAt: performance.now() })])
         } else {
-            this.signals.get(tokenAddress)!.push(new TokenSignal({ tokenAddress, chatId }))
+            this.signals.get(tokenAddress)!.push(new TokenSignal({ tokenAddress, chatId, createdAt: performance.now() }))
         }
 
-        const isTokenReadyToBeNotified = this.validateTokenSignals(this.signals.get(tokenAddress)!)
+        const signals = this.signals.get(tokenAddress);
+
+        if (!signals) {
+            return
+        }
+
+        const isTokenSignalLate = signals.length === 2 && this.isTokenSignalLate(signals)
+
+        if (isTokenSignalLate) {
+            this.untrackToken(tokenAddress)
+            return
+        }
+
+        const isTokenReadyToBeNotified = this.validateTokenSignals(signals)
 
         if (isTokenReadyToBeNotified) {
+            console.log(signals.map(signal => signal.options))
             this.subscriptionHandler(tokenAddress)
             this.untrackToken(tokenAddress)
         }

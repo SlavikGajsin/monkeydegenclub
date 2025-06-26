@@ -5,6 +5,7 @@ import {StoreSession} from "telegram/sessions/index.js";
 import {SignalsComposer} from "./modules/signals-composer/signals-composer.js";
 import {SolanaUtils} from "./modules/utils/solana-contract-parser.js";
 import {SolanaTokenDataService} from "./modules/utils/solana-token-data-service.js";
+import {SignalScrapperBot} from "./modules/signal-scrapper-bot.js";
 
 
 async function main() {
@@ -13,26 +14,16 @@ async function main() {
     const apiId = 20275345
     const apiHash = 'b049f562d3f21d020e679548d6ef03ac'
 
-    // const chatIdsToTrack = [
-    //     '-1002380293749', // Pump fun alerts
-    //     '-1001998961899', // Gem tools
-    // ]
-    // PROD
-    const chatIdsToTrack = [
-        'gem_tools_calls',
-        'pfultimate',
-        // 'ai_agent_solana_0xbot'
-    ]
-
-    // DEV
-    // const chatIdsToTrack = [
-    //     '-1002503039300', // Test 1
-    //     '-1002570818680' // Test 2
-    // ]
+    /** Тестовые каналы */
     // const chatIdsToTrack = [
     //     'vyacheslav_sol_tests_1',
     //     'vyacheslav_sol_tests_2'
     // ]
+
+    const TEST_CHANNELS = [
+        'vyacheslav_sol_tests_1',
+        'vyacheslav_sol_tests_2'
+    ]
 
     const client = new TelegramClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
@@ -45,78 +36,41 @@ async function main() {
         onError: (err) => console.log(err),
     });
 
-    const result = await Promise.all(chatIdsToTrack.map(id => client.invoke(
-        new Api.channels.GetFullChannel({ channel: id })
-    )));
-
-    console.log(result)
-
-    // const mappedIds = result.chats.map(chat => chat.id)
-
-    // console.log(result.chats.map(chat => chat.id))
-    // return
-
+    // Все подписки бота
+    // const result = await Promise.all(chatIdsToTrack.map(id => client.invoke(
+    //     new Api.channels.GetFullChannel({ channel: id })
+    // )));
+    //
+    // console.log(result)
     console.log('USER_AUTH_STATUS: ', await client.isUserAuthorized())
-
-    const telegramScrapper = new TelegramScrapper(client);
-
-    telegramScrapper.debug((_, event) => {
-        console.log(_, event)
-        client.sendMessage('RTD_makes', { message: String(_ || 'suka') })
-    })
 
     const solanaTokenDataService = new SolanaTokenDataService();
 
-    const signalHandler = async (tokenAddress: string) => {
-        // entity: id of closed group chat
-        // replyTo: the topic id
-        // @ts-ignore
-
-        let message = '';
-
-        if (tokenAddress) {
-            message += `\`${tokenAddress}\``;
-
-            const tokenData = await solanaTokenDataService.getTokenData(tokenAddress);
-
-            if (tokenData) {
-                // message += `/n ${JSON.stringify(tokenData)}`;
-
-                if (tokenData.ticker) {
-                    message += `\n(${tokenData.ticker})`
-                }
-
-                if (tokenData.marketCap && !Number.isNaN(Number(tokenData.marketCap))) {
-                    message += `\n$ ${Math.floor(Number(tokenData.marketCap) / 1000)}k MC`
-                }
-            }
+    new SignalScrapperBot({
+        channelsToWatch: [
+            'gem_tools_calls',
+            'pfultimate',
+        ],
+        telegramClient: client,
+        solanaTokenDataService,
+        signalChat: {
+            type: 'channel',
+            chatId: '-1002630922980' // Project X
         }
+    })
 
-        if (!tokenAddress) {
-            message = 'LOL HACKER HAS A REST AND U SHOULD TOO'
+    new SignalScrapperBot({
+        // channelsToWatch: [
+        //     'ai_agent_solana_0xbot',
+        //     'pfultimate'
+        // ],
+        channelsToWatch: TEST_CHANNELS,
+        telegramClient: client,
+        solanaTokenDataService,
+        signalChat: {
+            type: 'channel',
+            chatId: '-1002550127860' // Канал для тестирования бота
         }
-
-        await Promise.allSettled([
-            // client.sendMessage(-1002510658856, { message, replyTo: 2 }), // приватка где тестится бот
-            client.sendMessage('RTD_makes', { message }),
-            client.sendMessage('-1002630922980', { message })
-        ])
-
-
-    }
-
-    const signalsComposer = new SignalsComposer({ chatIdsToTrack }, signalHandler);
-
-    chatIdsToTrack.forEach(chatId => {
-        telegramScrapper.subscribeChannelMessages(chatId, (message) => {
-            const stringMessage = String(message)
-
-            const contractAddress = SolanaUtils.parseContractAddressFromString(stringMessage)
-
-            if (contractAddress) {
-                signalsComposer.addSignal(contractAddress, chatId)
-            }
-        })
     })
 }
 
