@@ -60,11 +60,11 @@ async function main() {
     })
 
     new SignalScrapperBot({
-        // channelsToWatch: [
-        //     'ai_agent_solana_0xbot',
-        //     'pfultimate'
-        // ],
-        channelsToWatch: TEST_CHANNELS,
+        channelsToWatch: [
+            'ai_agent_solana_0xbot',
+            'pfultimate'
+        ],
+        // channelsToWatch: TEST_CHANNELS,
         telegramClient: client,
         solanaTokenDataService,
         signalChat: {
