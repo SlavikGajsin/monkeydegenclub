@@ -1,4 +1,5 @@
 import { performance } from "perf_hooks";
+import {DebuggerService} from "../debugger/index.js";
 
 interface TokenSignalOptions {
     tokenAddress: string;
@@ -8,9 +9,15 @@ interface TokenSignalOptions {
 
 
 class TokenSignal {
+    readonly options: TokenSignalOptions;
+    readonly createdAtTime: string = ''
+
     constructor(
-        public readonly options: TokenSignalOptions,
-    ) {}
+        options: TokenSignalOptions,
+    ) {
+        this.options = options
+        this.createdAtTime = new Date(options.createdAt).toTimeString()
+    }
 }
 
 type TokenAddress = string
@@ -25,7 +32,8 @@ type SubscriptionHandler = (tokenAddress: string) => void;
 export class SignalsComposer {
     constructor(
         private readonly options: SignalsComposerOptions,
-        private readonly subscriptionHandler: SubscriptionHandler
+        private readonly subscriptionHandler: SubscriptionHandler,
+        private readonly debuggerService: DebuggerService,
     ) {}
 
     private signals = new Map<TokenAddress, TokenSignal[]>()
@@ -41,6 +49,12 @@ export class SignalsComposer {
     private isTokenSignalLate(tokenSignals: TokenSignal[]) {
         const [first, last] = tokenSignals
 
+        const timeBetweenSignals = Math.abs(first.options.createdAt - last.options.createdAt)
+
+        this.debuggerService.log(
+            `TIME BETWEEN SIGNALS for <code>${first.options.tokenAddress}</code>:\n${timeBetweenSignals / 1000 / 60} minutes`
+        )
+
         return Math.abs(first.options.createdAt - last.options.createdAt) > this.options.signalLifetime;
     }
 
@@ -50,12 +64,18 @@ export class SignalsComposer {
     }
 
     public addSignal(tokenAddress: TokenAddress, chatId: string) {
+        this.debuggerService.log(
+            `TOKEN SIGNAL FROM @${chatId}: <code>${tokenAddress}<code>`
+        )
+
         if (!this.options.chatIdsToTrack.includes(chatId)) {
             return
         }
 
         if (this.firedSignalTokenAddresses.has(tokenAddress)) {
-            console.log(tokenAddress, 'has already been notified')
+            this.debuggerService.log(
+                `TOKEN ADDRESS <code>${tokenAddress}</code> has already been notified.`
+            )
             return
         }
 
@@ -69,6 +89,10 @@ export class SignalsComposer {
 
         const signals = this.signals.get(tokenAddress);
 
+        this.debuggerService.log(
+            `CURRENT SIGNALS STATE FOR <code>${tokenAddress}</code>:\n${this.debuggerService.createJsonString(signals ?? [])}`
+        )
+
         if (!signals) {
             return
         }
@@ -76,6 +100,9 @@ export class SignalsComposer {
         const isTokenSignalLate = signals.length === 2 && this.isTokenSignalLate(signals)
 
         if (isTokenSignalLate) {
+            this.debuggerService.log(
+                `NEW TOKEN SIGNAL IS TOO LATE:\n${this.debuggerService.createJsonString(signals)}`
+            )
             this.untrackToken(tokenAddress)
             return
         }
@@ -83,7 +110,9 @@ export class SignalsComposer {
         const isTokenReadyToBeNotified = this.validateTokenSignals(signals)
 
         if (isTokenReadyToBeNotified) {
-            console.log(signals.map(signal => signal.options))
+            this.debuggerService.log(
+                `CREATING TOKEN SIGNAL NOTIFICATION FOR <code>${tokenAddress}</code>. SIGNALS: \n ${this.debuggerService.createJsonString(signals)}`
+            )
             this.subscriptionHandler(tokenAddress)
             this.untrackToken(tokenAddress)
         }

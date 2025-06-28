@@ -6,6 +6,7 @@ import {SignalsComposer} from "./modules/signals-composer/signals-composer.js";
 import {SolanaUtils} from "./modules/utils/solana-contract-parser.js";
 import {SolanaTokenDataService} from "./modules/utils/solana-token-data-service.js";
 import {SignalScrapperBot} from "./modules/signal-scrapper-bot.js";
+import {DebuggerService} from "./modules/debugger/index.js";
 
 
 async function main() {
@@ -46,6 +47,8 @@ async function main() {
 
     const solanaTokenDataService = new SolanaTokenDataService();
 
+    const debuggerService = new DebuggerService(client, { chatId: '-1002746744236' });
+
     new SignalScrapperBot({
         channelsToWatch: [
             'gem_tools_calls',
@@ -56,7 +59,8 @@ async function main() {
         signalChat: {
             type: 'channel',
             chatId: '-1002630922980' // Project X
-        }
+        },
+        debuggerService
     })
 
     new SignalScrapperBot({
@@ -70,7 +74,8 @@ async function main() {
         signalChat: {
             type: 'channel',
             chatId: '-1002550127860' // Канал для тестирования бота
-        }
+        },
+        debuggerService
     })
 }
 

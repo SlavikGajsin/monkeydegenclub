@@ -3,6 +3,7 @@ import {SolanaTokenDataService} from "./utils/solana-token-data-service.js";
 import {SignalsComposer} from "./signals-composer/signals-composer.js";
 import {SolanaUtils} from "./utils/solana-contract-parser.js";
 import {TelegramScrapper} from "./tg-scrapper/tg-scrapper.js";
+import {DebuggerService} from "./debugger/index.js";
 
 type SuperGroupConfig = {
     type: 'supergroup'
@@ -26,6 +27,7 @@ type ConstructorParams = {
     signalLifetime?: number /** ms */
     telegramClient: TelegramClient
     solanaTokenDataService: SolanaTokenDataService
+    debuggerService: DebuggerService
 }
 
 const ONE_HOUR = 60 * 1000
@@ -38,28 +40,35 @@ export class SignalScrapperBot {
     private readonly solanaTokenDataService: SolanaTokenDataService
     private readonly telegramScrapper: TelegramScrapper
     private readonly signalsComposer: SignalsComposer
+    private readonly debuggerService: DebuggerService
 
     constructor({
         channelsToWatch,
         signalChat,
         signalLifetime = ONE_HOUR,
         telegramClient,
-        solanaTokenDataService
+        solanaTokenDataService,
+        debuggerService
     }: ConstructorParams) {
         this.telegramClient = telegramClient
         this.channelsToWatch = channelsToWatch
         this.signalChat = signalChat
         this.signalLifetime = signalLifetime
         this.solanaTokenDataService = solanaTokenDataService
+        this.debuggerService = debuggerService
 
         this.telegramScrapper = new TelegramScrapper(telegramClient)
 
         // this.signalHandler.bind(this)
 
-        this.signalsComposer = new SignalsComposer({
-            chatIdsToTrack: this.channelsToWatch,
-            signalLifetime: this.signalLifetime
-        }, this.signalHandler);
+        this.signalsComposer = new SignalsComposer(
+            {
+                chatIdsToTrack: this.channelsToWatch,
+                signalLifetime: this.signalLifetime,
+            },
+            this.signalHandler,
+            this.debuggerService
+        );
 
         this.init()
     }
@@ -107,7 +116,7 @@ export class SignalScrapperBot {
 
         await Promise.allSettled([
             // client.sendMessage(-1002510658856, { message, replyTo: 2 }), // приватка где тестится бот
-            this.telegramClient.sendMessage('RTD_makes', { message }),
+            this.telegramClient.sendMessage('RTD_makes', { message: message + ' (signal)' }),
 
             new Promise(async (resolve) => {
                 if (this.signalChat.type === 'supergroup') {
