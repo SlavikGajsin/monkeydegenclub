@@ -30,7 +30,7 @@ type ConstructorParams = {
     debuggerService: DebuggerService
 }
 
-const ONE_HOUR = 60 * 1000
+const ONE_HOUR = 60 * 1000 * 60
 
 export class SignalScrapperBot {
     private readonly telegramClient: TelegramClient
