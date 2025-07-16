@@ -17,6 +17,10 @@ export class SolanaTokenDataService {
         const response = await fetch(apiUrl);
         const data = await response.json() as any;
 
+        if (!data.data) {
+            throw new Error(`No token data found for ${mintAddress}`);
+        }
+
         return {
             mintAddress: String(data.data.attributes.address),
             ticker: String(data.data.attributes.symbol),
