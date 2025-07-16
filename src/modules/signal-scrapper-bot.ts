@@ -5,18 +5,18 @@ import {SolanaUtils} from "./utils/solana-contract-parser.js";
 import {TelegramScrapper} from "./tg-scrapper/tg-scrapper.js";
 import {DebuggerService} from "./debugger/index.js";
 
-type SuperGroupConfig = {
+export type SuperGroupConfig = {
     type: 'supergroup'
     chatId: string
     topicId: string
 }
 
-type ChannelConfig = {
+export type ChannelConfig = {
     type: 'channel'
     chatId: string
 }
 
-type ChatConfig = {
+export type ChatConfig = {
     type: 'chat'
     chatId: string
 }

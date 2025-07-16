@@ -1,11 +1,8 @@
-import {TelegramClient, Api} from "telegram";
+import {TelegramClient} from "telegram";
 import input from 'input'
-import {TelegramScrapper} from "./modules/tg-scrapper/tg-scrapper.js";
 import {StoreSession} from "telegram/sessions/index.js";
-import {SignalsComposer} from "./modules/signals-composer/signals-composer.js";
-import {SolanaUtils} from "./modules/utils/solana-contract-parser.js";
 import {SolanaTokenDataService} from "./modules/utils/solana-token-data-service.js";
-import {SignalScrapperBot} from "./modules/signal-scrapper-bot.js";
+import {ChannelConfig, SignalScrapperBot} from "./modules/signal-scrapper-bot.js";
 import {DebuggerService} from "./modules/debugger/index.js";
 
 
@@ -14,17 +11,6 @@ async function main() {
     await stringSession.load()
     const apiId = 20275345
     const apiHash = 'b049f562d3f21d020e679548d6ef03ac'
-
-    /** Тестовые каналы */
-    // const chatIdsToTrack = [
-    //     'vyacheslav_sol_tests_1',
-    //     'vyacheslav_sol_tests_2'
-    // ]
-
-    const TEST_CHANNELS = [
-        'vyacheslav_sol_tests_1',
-        'vyacheslav_sol_tests_2'
-    ]
 
     const client = new TelegramClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
@@ -49,32 +35,47 @@ async function main() {
 
     const debuggerService = new DebuggerService(client, { chatId: '-1002746744236' });
 
+    const CHANNELS = Object.freeze({
+        GEM_TOOLS: 'gem_tools_calls',
+        PUMPFUN_ULTIMATE: 'pfultimate',
+        BONK_ULTIMATE: 'llutilmate',
+    } as const satisfies Record<string, string>)
+
+    const TEST_CHANNELS = Object.freeze({
+        TEST1: 'vyacheslav_sol_tests_1',
+        TEST2: 'vyacheslav_sol_tests_2',
+    } as const satisfies Record<string, string>)
+
+    const CHANNELS_TO_POST_SIGNALS_TO = Object.freeze({
+        PROJECT_X_PUMP_FUN: {
+            type: 'channel',
+            chatId: '-1002630922980'
+        },
+        PROJECT_X_BONK: {
+            type: 'channel',
+            chatId: '-1002730636796'
+        }
+    } as const satisfies Record<string, ChannelConfig>)
+
     new SignalScrapperBot({
         channelsToWatch: [
-            'gem_tools_calls',
-            'pfultimate',
+            CHANNELS.GEM_TOOLS,
+            CHANNELS.PUMPFUN_ULTIMATE,
         ],
         telegramClient: client,
         solanaTokenDataService,
-        signalChat: {
-            type: 'channel',
-            chatId: '-1002630922980' // Project X
-        },
+        signalChat: CHANNELS_TO_POST_SIGNALS_TO.PROJECT_X_PUMP_FUN,
         debuggerService
     })
 
     new SignalScrapperBot({
         channelsToWatch: [
-            'ai_agent_solana_0xbot',
-            'pfultimate'
+            CHANNELS.GEM_TOOLS,
+            CHANNELS.BONK_ULTIMATE,
         ],
-        // channelsToWatch: TEST_CHANNELS,
         telegramClient: client,
         solanaTokenDataService,
-        signalChat: {
-            type: 'channel',
-            chatId: '-1002550127860' // Канал для тестирования бота
-        },
+        signalChat: CHANNELS_TO_POST_SIGNALS_TO.PROJECT_X_BONK,
         debuggerService
     })
 }
