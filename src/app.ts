@@ -39,6 +39,7 @@ async function main() {
         GEM_TOOLS: 'gem_tools_calls',
         PUMPFUN_ULTIMATE: 'pfultimate',
         BONK_ULTIMATE: 'llutilmate',
+        NMF_SOL_CALLS_FREE: 'nmf_sol_calls_free'
     } as const satisfies Record<string, string>)
 
     const TEST_CHANNELS = Object.freeze({
@@ -59,7 +60,7 @@ async function main() {
 
     new SignalScrapperBot({
         channelsToWatch: [
-            CHANNELS.GEM_TOOLS,
+            CHANNELS.NMF_SOL_CALLS_FREE,
             CHANNELS.PUMPFUN_ULTIMATE,
         ],
         telegramClient: client,
