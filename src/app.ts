@@ -58,6 +58,24 @@ async function main() {
         }
     } as const satisfies Record<string, ChannelConfig>)
 
+    const TEST_CHANNELS_TO_POST_SIGNALS_TO = Object.freeze({
+        ITRUEMATONE_LFG: {
+            type: 'channel',
+            chatId: '-1002862194822'
+        }
+    }) satisfies Record<string, ChannelConfig>
+
+    new SignalScrapperBot({
+        channelsToWatch: [
+            CHANNELS.GEM_TOOLS,
+            CHANNELS.PUMPFUN_ULTIMATE
+        ],
+        telegramClient: client,
+        solanaTokenDataService,
+        signalChat: TEST_CHANNELS_TO_POST_SIGNALS_TO.ITRUEMATONE_LFG,
+        debuggerService
+    })
+
     new SignalScrapperBot({
         channelsToWatch: [
             CHANNELS.NMF_SOL_CALLS_FREE,
