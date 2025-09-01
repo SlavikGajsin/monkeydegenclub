@@ -78,7 +78,7 @@ async function main() {
 
     new SignalScrapperBot({
         channelsToWatch: [
-            CHANNELS.NMF_SOL_CALLS_FREE,
+            CHANNELS.GEM_TOOLS,
             CHANNELS.PUMPFUN_ULTIMATE,
         ],
         telegramClient: client,
