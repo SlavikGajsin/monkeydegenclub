@@ -31,6 +31,7 @@ type ConstructorParams = {
 }
 
 const ONE_HOUR = 60 * 1000 * 60
+const ONE_WEEK = ONE_HOUR * 24 * 7
 
 export class SignalScrapperBot {
     private readonly telegramClient: TelegramClient
@@ -45,7 +46,7 @@ export class SignalScrapperBot {
     constructor({
         channelsToWatch,
         signalChat,
-        signalLifetime = ONE_HOUR,
+        signalLifetime = ONE_WEEK,
         telegramClient,
         solanaTokenDataService,
         debuggerService
