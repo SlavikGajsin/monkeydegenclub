@@ -52,6 +52,10 @@ async function main() {
             type: 'channel',
             chatId: '-1002630922980'
         },
+        AI_SIGNALS_BOT: {
+            type: 'channel',
+            chatId: '-1003257149222'
+        },
         PROJECT_X_BONK: {
             type: 'channel',
             chatId: '-1002730636796'
@@ -73,6 +77,17 @@ async function main() {
         telegramClient: client,
         solanaTokenDataService,
         signalChat: TEST_CHANNELS_TO_POST_SIGNALS_TO.ITRUEMATONE_LFG,
+        debuggerService
+    })
+
+    new SignalScrapperBot({
+        channelsToWatch: [
+            CHANNELS.GEM_TOOLS,
+            CHANNELS.PUMPFUN_ULTIMATE
+        ],
+        telegramClient: client,
+        solanaTokenDataService,
+        signalChat: CHANNELS_TO_POST_SIGNALS_TO.AI_SIGNALS_BOT,
         debuggerService
     })
 
